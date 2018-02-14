@@ -9,7 +9,7 @@ extern crate x509_parser;
 use std::fmt;
 use nom::IResult;
 use x509_parser::X509Certificate;
-// use x509_parser::TbsCertificate;
+use x509_parser::TbsCertificate;
 // use x509_parser::error::X509Error;
 // use der_parser::DerObjectContent;
 use std::error::Error;
@@ -38,9 +38,9 @@ ofaybcIL5W4mqqWgirIMyZYaIjv36b0h
 
 struct Certificate<'a> {
     pub cert_bytes: &'a [u8],
-    pub xcert: X509Certificate<'a>,
+    pub xcert: &'a X509Certificate<'a>,
     // pub tbs: TbsCertificate<'a>,
-    // pub expires: time::Tm,
+    pub expires: time::Tm,
 }
 
 struct TeaError {
@@ -103,31 +103,31 @@ fn decode(pretty_base64: &str) -> Result<Vec<u8>, TeaError> {
 fn parse_outer(cert_bytes: &[u8]) -> Result<Certificate, TeaError> {
     // let cert_base64: String = X509.chars().filter(|c| !c.is_whitespace()).collect();
     let xcert = parse_certificate4(cert_bytes)?;
-    // let tbs = xcert.tbs_certificate()?;
-    // let validity = tbs.validity()?;
-    // let expires = validity.iter().nth(1)?;
+    let tbs = xcert.tbs_certificate()?;
+    let validity = tbs.validity()?;
+    let expires = validity.iter().nth(1)?;
     // let algo = xcert.signature_algorithm()?;
     Ok(Certificate {
         cert_bytes,
-        xcert: xcert,
+        xcert: &xcert,
         // tbs,
-        // expires,
+        expires: *expires,
     })
 }
 
-#[allow(unused)]
-fn main2() {
-    match decode(X509) {
-        Ok(cert_bytes) => parse_outer(&cert_bytes).and_then(|cert| {
-            println!("Got CERT, {:?}", cert.xcert.signature_algorithm());
-            Ok(())
-        }),
-        Err(e) => {
-            eprintln!("{}", e);
-            std::process::exit(10);
-        }
-    };
-}
+// #[allow(unused)]
+// fn main2() {
+//     match decode(X509) {
+//         Ok(cert_bytes) => parse_outer(&cert_bytes).and_then(|cert| {
+//             println!("Got CERT, {:?}", cert.xcert.signature_algorithm());
+//             Ok(())
+//         }),
+//         Err(e) => {
+//             eprintln!("{}", e);
+//             std::process::exit(10);
+//         }
+//     };
+// }
 
 fn main() {
     let cert_bytes = decode(X509).unwrap_or_else(|e| {
@@ -138,6 +138,6 @@ fn main() {
         eprintln!("{}", e);
         std::process::exit(10);
     });
-    println!("Got CERT, {:?}", cert.xcert.signature_algorithm());
+    println!("Got expires, {:?}", cert.expires);
     println!("Got bytes, {:?}", &cert.cert_bytes[0..2]);
 }
