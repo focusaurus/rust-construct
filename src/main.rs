@@ -1,8 +1,7 @@
-
 #[derive(Debug)]
 enum NomError {
     Failed1(String),
-    Failed2(String)
+    Failed2(String),
 }
 
 // models nom_pem::decode_block
@@ -12,7 +11,7 @@ fn decode_block(input: &str) -> Result<String, NomError> {
 
 #[derive(Debug)]
 enum ParseError {
-    Bummer(String)
+    Bummer(String),
 }
 
 // models x509_parser::x509_parser
@@ -22,12 +21,7 @@ fn x509_parser(data: String) -> Result<char, ParseError> {
 
 fn main() {
     println!("construct");
-    println!(
-        "{:?}",
-        decode_block("hey")
-            .map(|upper| x509_parser(upper))
-            .map(|a_char| 'X')
-            .map_err(|nom_error| format!("{:?}", nom_error))
-            // .and_then(|a_char| a_char)
-    );
+    let tm_vec = vec![0, 1];
+    let second: Result<&u8, &str> = tm_vec.iter().nth(1).ok_or_else(||"nope");
+    println!("{:?}", second);
 }
